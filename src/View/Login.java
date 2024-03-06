@@ -1,11 +1,18 @@
 
 package View;
 
+import Model.User;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import Controller.Main;
+import Controller.SQLite;
+
 public class Login extends javax.swing.JPanel {
 
     public Frame frame;
+    SQLite sqlite = Main.getInstance().getSqlite();
     
-    public Login() {
+    public Login(){
         initComponents();
     }
 
@@ -82,14 +89,48 @@ public class Login extends javax.swing.JPanel {
                 .addContainerGap(126, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
+    
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
-        frame.mainNav();
+        String username = usernameFld.getText();
+        String password = passwordFld.getText();
+        
+        boolean user = findUser(username); //check if username exists
+        boolean pw = checkPassword(username, password);
+        
+        if (user && pw) { // valid username and pw
+                frame.mainNav(); // login successful
+        } else { // username doesnt exist or wrong pw, user is not yet locked
+            JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_loginBtnActionPerformed
+
+    private boolean findUser(String username) {
+        // Retrieve list of users
+        ArrayList<Model.User> users = sqlite.getUsers();
+        
+        // Loop through the users array list
+        for (Model.User user : users) {
+        if (user.getUsername().equals(username)) {
+            return true; //user name found
+        }
+    }
+    // Username does not exist, return false
+    return false;
+    }
+    
+    private boolean checkPassword(String username, String password) {
+        ArrayList<Model.User> users = sqlite.getUsers();
+        for (Model.User user : users) {
+            if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+                return true; // Username and password match
+            }
+        }
+        return false;
+    }
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
         frame.registerNav();
     }//GEN-LAST:event_registerBtnActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
