@@ -1,5 +1,6 @@
 
 package View;
+import javax.swing.JOptionPane;
 
 public class Register extends javax.swing.JPanel {
 
@@ -97,7 +98,30 @@ public class Register extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
-        frame.registerAction(usernameFld.getText(), passwordFld.getText(), confpassFld.getText());
+        
+        //String username = usernameFld.getText();
+        String password = passwordFld.getText();
+        String confPassword = confpassFld.getText();
+        
+        if (password.length() < 8 ) {
+        // Password does not meet the criteria
+        JOptionPane.showMessageDialog(this, "Password must be at least 8 characters", "Password Error", JOptionPane.ERROR_MESSAGE);
+        return;
+        }
+        
+        if (!containsUpperCase(password)) {
+        // Password does not meet the criteria
+        JOptionPane.showMessageDialog(this, "Password must contain at least one uppercase letter.", "Password Error", JOptionPane.ERROR_MESSAGE);
+        return;
+        }
+        
+        if (!password.equals(confPassword)) {
+        // Passwords do not match
+        JOptionPane.showMessageDialog(this, "Passwords do not match.", "Password Error", JOptionPane.ERROR_MESSAGE);
+        return;
+        }
+        
+        frame.registerAction(usernameFld.getText(), password, confPassword);
         frame.loginNav();
     }//GEN-LAST:event_registerBtnActionPerformed
 
@@ -105,7 +129,14 @@ public class Register extends javax.swing.JPanel {
         frame.loginNav();
     }//GEN-LAST:event_backBtnActionPerformed
 
-
+    private boolean containsUpperCase(String str) {
+    for (char c : str.toCharArray()) {
+        if (Character.isUpperCase(c)) {
+            return true;
+        }
+    }
+    return false;
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
     private javax.swing.JTextField confpassFld;
