@@ -18,6 +18,8 @@ public class Login extends javax.swing.JPanel {
     public Login(){
         initComponents();
     }
+    
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -43,6 +45,7 @@ public class Login extends javax.swing.JPanel {
         passwordFld.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         passwordFld.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         passwordFld.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 2, true), "PASSWORD", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12))); // NOI18N
+        passwordFld.setName(""); // NOI18N
 
         registerBtn.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         registerBtn.setText("REGISTER");
@@ -97,48 +100,51 @@ public class Login extends javax.swing.JPanel {
         String username = usernameFld.getText();
         String password = passwordFld.getText();
         
-        boolean user = findUser(username); //check if username exists
-        User u = getUser(username); // curr user
-        
-        if (user) {
-            // count failed log in attemps for user, assign to failedAttempts
-            ArrayList<Logs> logs = sqlite.getLogs();
+        if (password.equals("") || username.equals("")) { // one of two fields is left empty
+            clearFields();
+            JOptionPane.showMessageDialog(this, "Please enter both fields.", "Login Error", JOptionPane.ERROR_MESSAGE);
+        } else { //both fields entered
             
-            int failedAttempts = countFailedAttempts(username,logs);
-            
-            if (u.getLocked() == 1) { // user is locked
-                JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
-                sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());   
-            } else if (failedAttempts >= 3){ // not locked but 3 failed attempts
-                JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
-                 sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
-                u.setLocked(1); // set lock to 1 or true
-            }
-            
-            boolean pw = checkPassword(username, password); // Check if password matches username
-        
-            if (!pw) { // Wrong password
-                // Log the failed login attempt
-                sqlite.addLogs("FAILED LOGIN", username, username + " wrong password.", new Timestamp(new Date().getTime()).toString());
-            
-                // check failed attempts, if >= 3, lock user
-                if (failedAttempts >= 3){ // not locked but 3 failed attempts
-                JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
-                 sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
-                u.setLocked(1); // set lock to 1 or true
+            boolean user = findUser(username); //check if username exists
+            User u = getUser(username); // curr user
+
+            if (user) {
+                // count failed log in attemps for user, assign to failedAttempts
+                ArrayList<Logs> logs = sqlite.getLogs();
+
+                int failedAttempts = countFailedAttempts(username,logs);
+
+                if (u.getLocked() == 1) { // user is locked
+                    JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                    clearFields();
+                    sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());   
+                } else if (failedAttempts >= 3){ // not locked but 3 failed attempts
+                    JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                     sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
+                    u.setLocked(1); // set lock to 1 or true
+                    clearFields();
                 }
-                // wrong pw not yet locked
-                else {
-                    JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
+
+                boolean pw = checkPassword(username, password); // Check if password matches username
+
+                if (!pw) { // Wrong password
+                    sqlite.addLogs("FAILED LOGIN", username, username + " wrong password.", new Timestamp(new Date().getTime()).toString()); // log failed attempt
+                    
+                    if (failedAttempts >= 3){ // not locked but 3 failed attempts
+                    JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                    sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
+                    u.setLocked(1); // set lock to 1 or true
+                    } else { // wrong pw not yet locked
+                        JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                    clearFields(); 
+                } else { // right pw
+                    sqlite.addLogs("LOGIN", username, username + " logged in successfully.", new Timestamp(new Date().getTime()).toString());
+                    clearFields();
+                    frame.mainNav(); // Login successful
                 }
-                
-            } else { // right pw
-                sqlite.addLogs("LOGIN", username, username + " logged in successfully.", new Timestamp(new Date().getTime()).toString());
-                frame.mainNav(); // Login successful
             }
-        } else { // (!user)
-            JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
-        }    
+        }
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private boolean findUser(String username) {
@@ -173,14 +179,24 @@ public class Login extends javax.swing.JPanel {
     
     public int countFailedAttempts(String username, ArrayList<Logs> logs) {
         int failedAttempts = 0;
+        boolean found = false;
+        Timestamp lastSuccessfulLogin = null;
+        
         for (Logs log : logs) {
-            if (log.getUsername().equals(username) && log.getEvent().equals("FAILED LOGIN")) {
-            failedAttempts++;
+            // Check if the log entry is a successful login
+            if (log.getUsername().equals(username) && log.getEvent().equals("LOGIN")) {
+                lastSuccessfulLogin = log.getTimestamp(); // Update the timestamp of the last successful login
+                found = true;
+            }
+
+            // Check if the log entry is a failed login and occurred after the last successful login
+            if (log.getUsername().equals(username) && log.getEvent().equals("FAILED LOGIN") && found && log.getTimestamp().after(lastSuccessfulLogin)) {
+                failedAttempts++;
             }
         }
         return failedAttempts;
     }
-
+    
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
         frame.registerNav();
     }//GEN-LAST:event_registerBtnActionPerformed
