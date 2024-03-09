@@ -4,6 +4,7 @@ import Controller.Main;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import javax.swing.JOptionPane;
 import javax.swing.WindowConstants;
 
 public class Frame extends javax.swing.JFrame {
@@ -180,23 +181,39 @@ public class Frame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void adminBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_adminBtnActionPerformed
-        adminHomePnl.showPnl("home");
-        contentView.show(Content, "adminHomePnl");
+        if (userRole == 5){
+            adminHomePnl.showPnl("home");
+            contentView.show(Content, "adminHomePnl");
+        } else {
+            JOptionPane.showMessageDialog(this, "You do not have access to this page.", "Access Denied", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_adminBtnActionPerformed
 
     private void managerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_managerBtnActionPerformed
-        managerHomePnl.showPnl("home");
-        contentView.show(Content, "managerHomePnl");
+        if (userRole == 4){
+            managerHomePnl.showPnl("home");
+            contentView.show(Content, "managerHomePnl");
+        } else {
+            JOptionPane.showMessageDialog(this, "You do not have access to this page.", "Access Denied", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_managerBtnActionPerformed
 
     private void staffBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_staffBtnActionPerformed
-        staffHomePnl.showPnl("home");
-        contentView.show(Content, "staffHomePnl");
+        if (userRole == 3) {
+            staffHomePnl.showPnl("home");
+            contentView.show(Content, "staffHomePnl");
+        } else {
+            JOptionPane.showMessageDialog(this, "You do not have access to this page.", "Access Denied", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_staffBtnActionPerformed
 
     private void clientBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientBtnActionPerformed
-        clientHomePnl.showPnl("home");
-        contentView.show(Content, "clientHomePnl");
+        if (userRole == 2){
+            clientHomePnl.showPnl("home");
+            contentView.show(Content, "clientHomePnl");
+        } else {
+            JOptionPane.showMessageDialog(this, "You do not have access to this page.", "Access Denied", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_clientBtnActionPerformed
 
     private void logoutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutBtnActionPerformed
@@ -215,6 +232,8 @@ public class Frame extends javax.swing.JFrame {
     
     private CardLayout contentView = new CardLayout();
     private CardLayout frameView = new CardLayout();
+    
+    private int userRole;
     
     public void init(Main controller){
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -247,6 +266,20 @@ public class Frame extends javax.swing.JFrame {
     
     public void mainNav(){
         frameView.show(Container, "homePnl");
+        switch (userRole) {
+            case 4:
+                managerHomePnl.showPnl("home");
+                contentView.show(Content, "managerHomePnl");
+                break;
+            case 3:
+                staffHomePnl.showPnl("home");
+                contentView.show(Content, "staffHomePnl");
+                break;
+            case 2:
+                clientHomePnl.showPnl("home");
+                contentView.show(Content, "clientHomePnl");
+                break;
+        }
     }
     
     public void loginNav(){
@@ -259,6 +292,10 @@ public class Frame extends javax.swing.JFrame {
     
     public void registerAction(String username, String password, String confpass){
         main.sqlite.addUser(username, password);
+    }
+    
+    public void currUserRole(int userRole) {
+        this.userRole = userRole;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
