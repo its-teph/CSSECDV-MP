@@ -121,9 +121,16 @@ public class Login extends javax.swing.JPanel {
                 // Log the failed login attempt
                 sqlite.addLogs("FAILED LOGIN", username, username + " wrong password.", new Timestamp(new Date().getTime()).toString());
             
-                // check failed attempts, if >= 3, lock user (if block)
-                
-                // (else block) display            JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                // check failed attempts, if >= 3, lock user
+                if (failedAttempts >= 3){ // not locked but 3 failed attempts
+                JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                 sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
+                u.setLocked(1); // set lock to 1 or true
+                }
+                // wrong pw not yet locked
+                else {
+                    JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                }
                 
             } else { // right pw
                 sqlite.addLogs("LOGIN", username, username + " logged in successfully.", new Timestamp(new Date().getTime()).toString());
