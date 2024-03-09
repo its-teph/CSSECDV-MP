@@ -5,7 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 import javax.swing.WindowConstants;
-import View.Login;
 
 public class Frame extends javax.swing.JFrame {
 

@@ -1,11 +1,9 @@
-
 package View;
 
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import Controller.Main;
 import Controller.SQLite;
-
 
 public class Register extends javax.swing.JPanel {
 
