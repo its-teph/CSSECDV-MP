@@ -2,10 +2,13 @@
 package View;
 
 import Model.User;
+import Model.Logs;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import Controller.Main;
 import Controller.SQLite;
+import java.sql.Timestamp;
+import java.util.Date;
 
 public class Login extends javax.swing.JPanel {
 
@@ -95,37 +98,80 @@ public class Login extends javax.swing.JPanel {
         String password = passwordFld.getText();
         
         boolean user = findUser(username); //check if username exists
-        boolean pw = checkPassword(username, password);
+        User u = getUser(username); // curr user
         
-        if (user && pw) { // valid username and pw
-                frame.mainNav(); // login successful
-        } else { // username doesnt exist or wrong pw, user is not yet locked
+        if (user) {
+            // count failed log in attemps for user, assign to failedAttempts
+            ArrayList<Logs> logs = sqlite.getLogs();
+            
+            int failedAttempts = countFailedAttempts(username,logs);
+            
+            if (u.getLocked() == 1) { // user is locked
+                JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());   
+            } else if (failedAttempts >= 3){ // not locked but 3 failed attempts
+                JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                 sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
+                u.setLocked(1); // set lock to 1 or true
+            }
+            
+            boolean pw = checkPassword(username, password); // Check if password matches username
+        
+            if (!pw) { // Wrong password
+                // Log the failed login attempt
+                sqlite.addLogs("FAILED LOGIN", username, username + " wrong password.", new Timestamp(new Date().getTime()).toString());
+            
+                // check failed attempts, if >= 3, lock user (if block)
+                
+                // (else block) display            JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                
+            } else { // right pw
+                sqlite.addLogs("LOGIN", username, username + " logged in successfully.", new Timestamp(new Date().getTime()).toString());
+                frame.mainNav(); // Login successful
+            }
+        } else { // (!user)
             JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
-        }
+        }    
     }//GEN-LAST:event_loginBtnActionPerformed
 
     private boolean findUser(String username) {
-        // Retrieve list of users
-        ArrayList<Model.User> users = sqlite.getUsers();
-        
-        // Loop through the users array list
+        ArrayList<Model.User> users = sqlite.getUsers(); // get list of users
         for (Model.User user : users) {
         if (user.getUsername().equals(username)) {
-            return true; //user name found
+            return true; //username found
         }
     }
-    // Username does not exist, return false
-    return false;
+    return false; // username does not exist
+    }
+    
+    private User getUser(String username) {
+        ArrayList<Model.User> users = sqlite.getUsers(); // get list of users
+        for (Model.User user : users) {
+            if (user.getUsername().equals(username)) {
+            return user; //username found
+            }
+        }
+        return null; // username does not exist
     }
     
     private boolean checkPassword(String username, String password) {
         ArrayList<Model.User> users = sqlite.getUsers();
         for (Model.User user : users) {
             if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
-                return true; // Username and password match
+                return true; // username and password match
             }
         }
-        return false;
+        return false; // wrong pw
+    }
+    
+    public int countFailedAttempts(String username, ArrayList<Logs> logs) {
+        int failedAttempts = 0;
+        for (Logs log : logs) {
+            if (log.getUsername().equals(username) && log.getEvent().equals("FAILED LOGIN")) {
+            failedAttempts++;
+            }
+        }
+        return failedAttempts;
     }
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
