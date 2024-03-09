@@ -115,15 +115,18 @@ public class Login extends javax.swing.JPanel {
                 int failedAttempts = countFailedAttempts(username,logs);
 
                 if (u.getLocked() == 1) { // user is locked
-                    JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Your account is locked. Please contact admin to regain access.", "Account Locked", JOptionPane.ERROR_MESSAGE);
                     clearFields();
                     sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());   
+                    return;
                 } else if (failedAttempts >= 3){ // not locked but 3 failed attempts
-                    JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Your account is locked. Please contact admin to regain access.", "Account Locked", JOptionPane.ERROR_MESSAGE);
                      sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
                     u.setLocked(1); // set lock to 1 or true
                     clearFields();
+                    return;
                 }
+                
 
                 boolean pw = checkPassword(username, password); // Check if password matches username
 
@@ -131,9 +134,10 @@ public class Login extends javax.swing.JPanel {
                     sqlite.addLogs("FAILED LOGIN", username, username + " wrong password.", new Timestamp(new Date().getTime()).toString()); // log failed attempt
                     
                     if (failedAttempts >= 3){ // not locked but 3 failed attempts
-                    JOptionPane.showMessageDialog(this, "Your account is locked. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Your account is locked. Please contact admin to regain access.", "Account Locked", JOptionPane.ERROR_MESSAGE);
                     sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
                     u.setLocked(1); // set lock to 1 or true
+                    return;
                     } else { // wrong pw not yet locked
                         JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
                     }
@@ -179,18 +183,19 @@ public class Login extends javax.swing.JPanel {
     
     public int countFailedAttempts(String username, ArrayList<Logs> logs) {
         int failedAttempts = 0;
-        boolean found = false;
         Timestamp lastSuccessfulLogin = null;
         
         for (Logs log : logs) {
-            // Check if the log entry is a successful login
-            if (log.getUsername().equals(username) && log.getEvent().equals("LOGIN")) {
-                lastSuccessfulLogin = log.getTimestamp(); // Update the timestamp of the last successful login
-                found = true;
+            if (log.getUsername().equals(username) && log.getEvent().equals("LOGIN")) { // get last successful login
+                lastSuccessfulLogin = log.getTimestamp();
             }
 
             // Check if the log entry is a failed login and occurred after the last successful login
-            if (log.getUsername().equals(username) && log.getEvent().equals("FAILED LOGIN") && found && log.getTimestamp().after(lastSuccessfulLogin)) {
+            if (lastSuccessfulLogin != null && log.getUsername().equals(username) && log.getEvent().equals("FAILED LOGIN") && log.getTimestamp().after(lastSuccessfulLogin)) {
+                failedAttempts++;
+            }
+            
+            if (lastSuccessfulLogin == null && log.getUsername().equals(username) && log.getEvent().equals("FAILED LOGIN")) {
                 failedAttempts++;
             }
         }
