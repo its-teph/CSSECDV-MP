@@ -1,10 +1,14 @@
-
 package View;
+
+import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import Controller.Main;
+import Controller.SQLite;
 
 public class Register extends javax.swing.JPanel {
 
     public Frame frame;
+    SQLite sqlite = Main.getInstance().getSqlite();
     
     public Register() {
         initComponents();
@@ -99,26 +103,31 @@ public class Register extends javax.swing.JPanel {
 
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
         
-        //String username = usernameFld.getText();
+        String username = usernameFld.getText();
         String password = passwordFld.getText();
-        String confPassword = confpassFld.getText();
+        String confPassword = confpassFld.getText(); // Change here
+        boolean user = findUser(username);
         
         if (password.length() < 8 ) {
         // Password does not meet the criteria
-        JOptionPane.showMessageDialog(this, "Password must be at least 8 characters", "Password Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Password must be at least 8 characters", "Password Error", JOptionPane.ERROR_MESSAGE);
         return;
         }
         
         if (!containsUpperCase(password)) {
         // Password does not meet the criteria
-        JOptionPane.showMessageDialog(this, "Password must contain at least one uppercase letter.", "Password Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Password must contain at least one uppercase letter.", "Password Error", JOptionPane.ERROR_MESSAGE);
         return;
         }
         
         if (!password.equals(confPassword)) {
         // Passwords do not match
-        JOptionPane.showMessageDialog(this, "Passwords do not match.", "Password Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Passwords do not match.", "Password Error", JOptionPane.ERROR_MESSAGE);
         return;
+        }
+        
+        if(user) {
+            JOptionPane.showMessageDialog(this, "Username already exists.", "Username Error", JOptionPane.ERROR_MESSAGE);
         }
         
         frame.registerAction(usernameFld.getText(), password, confPassword);
@@ -137,6 +146,22 @@ public class Register extends javax.swing.JPanel {
     }
     return false;
     }
+    
+    private boolean findUser(String username) {
+        // Retrieve list of users
+        ArrayList<Model.User> users = sqlite.getUsers();
+        
+        // Loop through the users array list
+        for (Model.User user : users) {
+        if (user.getUsername().equals(username)) {
+            return true; //user name found
+        }
+    }
+    // Username does not exist, return false
+    return false;
+    }
+    
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
     private javax.swing.JTextField confpassFld;
