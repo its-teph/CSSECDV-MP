@@ -153,6 +153,7 @@ public class Login extends javax.swing.JPanel {
                     clearFields();
                     frame.currUserRole(u.getRole());
                     frame.mainNav(); // Login successful
+                    //int role = u.getRole();
                 }
             }
         }
@@ -219,6 +220,7 @@ public class Login extends javax.swing.JPanel {
     }
     
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
+        clearFields();
         frame.registerNav();
     }//GEN-LAST:event_registerBtnActionPerformed
 

@@ -179,8 +179,9 @@ public class SQLite {
         }
     }
     
-    public void addUser(String username, String password) {
-        String sql = "INSERT INTO users(username,password) VALUES('" + username + "','" + password + "')";
+    public void addUser(String username, char[] password) {
+        String pw = new String(password);
+        String sql = "INSERT INTO users(username, password) VALUES('" + username + "','" + pw + "')";
         
         try (Connection conn = DriverManager.getConnection(driverURL);
             Statement stmt = conn.createStatement()){

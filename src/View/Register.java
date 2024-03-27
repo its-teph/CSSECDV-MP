@@ -19,10 +19,10 @@ public class Register extends javax.swing.JPanel {
     private void initComponents() {
 
         registerBtn = new javax.swing.JButton();
-        passwordFld = new javax.swing.JTextField();
+        passwordFld = new javax.swing.JPasswordField();
         usernameFld = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        confpassFld = new javax.swing.JTextField();
+        confpassFld = new javax.swing.JPasswordField();
         backBtn = new javax.swing.JButton();
 
         registerBtn.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
@@ -104,33 +104,42 @@ public class Register extends javax.swing.JPanel {
     private void registerBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerBtnActionPerformed
         
         String username = usernameFld.getText();
-        String password = passwordFld.getText();
-        String confPassword = confpassFld.getText(); // Change here
+        char[] passwordChars = passwordFld.getPassword();
+        char[] confPasswordChars = confpassFld.getPassword();
+        String password = new String(passwordChars);
+        String confPassword = new String(confPasswordChars);
         boolean user = findUser(username);
-        
-        if (password.length() < 8 ) {
-        // Password does not meet the criteria
+
+        if (passwordChars.length < 8) {
+            // Password does not meet the criteria
             JOptionPane.showMessageDialog(this, "Password must be at least 8 characters", "Password Error", JOptionPane.ERROR_MESSAGE);
-        return;
+            clearFields();
+            return;
         }
-        
-        if (!containsUpperCase(password)) {
-        // Password does not meet the criteria
+
+        if (!containsUpperCase(passwordChars)) {
+            // Password does not meet the criteria
             JOptionPane.showMessageDialog(this, "Password must contain at least one uppercase letter.", "Password Error", JOptionPane.ERROR_MESSAGE);
-        return;
+            clearFields();
+            return;
         }
-        
+
         if (!password.equals(confPassword)) {
-        // Passwords do not match
+            // Passwords do not match
             JOptionPane.showMessageDialog(this, "Passwords do not match.", "Password Error", JOptionPane.ERROR_MESSAGE);
-        return;
+            clearFields();
+            return;
         }
-        
-        if(user) {
+
+        if (user) {
             JOptionPane.showMessageDialog(this, "Username already exists.", "Username Error", JOptionPane.ERROR_MESSAGE);
+            clearFields();
+            return;
         }
-        
-        frame.registerAction(usernameFld.getText(), password, confPassword);
+
+        // Register the user
+        frame.registerAction(username, passwordChars, confPasswordChars);
+        clearFields();
         frame.loginNav();
     }//GEN-LAST:event_registerBtnActionPerformed
 
@@ -138,13 +147,13 @@ public class Register extends javax.swing.JPanel {
         frame.loginNav();
     }//GEN-LAST:event_backBtnActionPerformed
 
-    private boolean containsUpperCase(String str) {
-    for (char c : str.toCharArray()) {
-        if (Character.isUpperCase(c)) {
-            return true;
+    private boolean containsUpperCase(char[] password) {
+        for (char c : password) {
+            if (Character.isUpperCase(c)) {
+                return true;
+            }
         }
-    }
-    return false;
+        return false; // No uppercase letter found
     }
     
     private boolean findUser(String username) {
@@ -161,12 +170,19 @@ public class Register extends javax.swing.JPanel {
     return false;
     }
     
+    private void clearFields() {
+    usernameFld.setText("");
+    passwordFld.setText("");
+    confpassFld.setText("");
+    }
+
+    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
-    private javax.swing.JTextField confpassFld;
+    private javax.swing.JPasswordField confpassFld;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JTextField passwordFld;
+    private javax.swing.JPasswordField passwordFld;
     private javax.swing.JButton registerBtn;
     private javax.swing.JTextField usernameFld;
     // End of variables declaration//GEN-END:variables
