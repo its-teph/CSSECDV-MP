@@ -234,6 +234,7 @@ public class Frame extends javax.swing.JFrame {
     private CardLayout frameView = new CardLayout();
     
     private int userRole;
+    private String username;
     
     public void init(Main controller){
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -275,10 +276,10 @@ public class Frame extends javax.swing.JFrame {
                 staffHomePnl.showPnl("home");
                 contentView.show(Content, "staffHomePnl");
                 break;
-            case 2:
+            case 2: 
                 clientHomePnl.showPnl("home");
+                clientHomePnl.getUsername(username);
                 contentView.show(Content, "clientHomePnl");
-                break;
         }
     }
     
@@ -296,6 +297,10 @@ public class Frame extends javax.swing.JFrame {
     
     public void currUserRole(int userRole) {
         this.userRole = userRole;
+    }
+    
+    public void currUserName(String username) {
+        this.username = username;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

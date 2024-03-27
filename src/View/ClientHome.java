@@ -27,15 +27,17 @@ public class ClientHome extends javax.swing.JPanel {
     public MgmtUser mgmtUser;
     
     private CardLayout contentView = new CardLayout();
+    private int role = 2;
+    private String username;
     
     public ClientHome() {
         initComponents();
     }
     
     public void init(SQLite sqlite){
-        mgmtHistory = new MgmtHistory(sqlite);
+        mgmtHistory = new MgmtHistory(sqlite, username, role);
         mgmtLogs = new MgmtLogs(sqlite);
-        mgmtProduct = new MgmtProduct(sqlite);
+        mgmtProduct = new MgmtProduct(sqlite, role);
         mgmtUser = new MgmtUser(sqlite);
     
         Content.setLayout(contentView);
@@ -45,15 +47,19 @@ public class ClientHome extends javax.swing.JPanel {
         Content.add(mgmtProduct, "mgmtProduct");
         Content.add(mgmtLogs, "mgmtLogs");
         
-//        UNCOMMENT TO DISABLE BUTTONS
-//        historyBtn.setVisible(false);
-//        usersBtn.setVisible(false);
-//        productsBtn.setVisible(false);
-//        logsBtn.setVisible(false);
+//      UNCOMMENT TO DISABLE BUTTONS
+//      historyBtn.setVisible(false);
+        usersBtn.setVisible(false);
+//      productsBtn.setVisible(false);
+        logsBtn.setVisible(false);
     }
     
     public void showPnl(String panelName){
         contentView.show(Content, panelName);
+    }
+    
+    public void getUsername(String username){
+        this.username = username;
     }
 
     /**

@@ -22,9 +22,14 @@ public class MgmtHistory extends javax.swing.JPanel {
     public SQLite sqlite;
     public DefaultTableModel tableModel;
     
-    public MgmtHistory(SQLite sqlite) {
+    private String username = null;
+    private int role = 0;
+    
+    public MgmtHistory(SQLite sqlite, String username, int role) {
         initComponents();
         this.sqlite = sqlite;
+        this.username = username;
+        this.role = role;
         tableModel = (DefaultTableModel)table.getModel();
         table.getTableHeader().setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 14));
         javax.swing.table.DefaultTableCellRenderer rightAlign = new javax.swing.table.DefaultTableCellRenderer();
@@ -33,6 +38,10 @@ public class MgmtHistory extends javax.swing.JPanel {
         table.getColumnModel().getColumn(3).setCellRenderer(rightAlign);
         table.getColumnModel().getColumn(4).setCellRenderer(rightAlign);
         table.getColumnModel().getColumn(5).setCellRenderer(rightAlign);
+        
+        if(role == 2) {
+            searchBtn.setVisible(false);
+        }
         
 //        UNCOMMENT TO DISABLE BUTTONS
 //        searchBtn.setVisible(false);
@@ -43,21 +52,41 @@ public class MgmtHistory extends javax.swing.JPanel {
 //      CLEAR TABLE
         for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
             tableModel.removeRow(0);
-        }
+        }    
         
-//      LOAD CONTENTS
-        ArrayList<History> history = sqlite.getHistory();
-        for(int nCtr = 0; nCtr < history.size(); nCtr++){
-            Product product = sqlite.getProduct(history.get(nCtr).getName());
-            tableModel.addRow(new Object[]{
-                history.get(nCtr).getUsername(), 
-                history.get(nCtr).getName(), 
-                history.get(nCtr).getStock(), 
-                product.getPrice(), 
-                product.getPrice() * history.get(nCtr).getStock(), 
-                history.get(nCtr).getTimestamp()
-            });
+        // NOT WORKING PLS FIX WALA LUMALABAS
+        if (role == 2) {
+            for (History entry : sqlite.getHistory()) {
+                if (entry.getUsername().equals(username)) {
+                    Product product = sqlite.getProduct(entry.getName());
+                    tableModel.addRow(new Object[]{
+                        entry.getUsername(), 
+                        entry.getName(), 
+                        entry.getStock(), 
+                        product.getPrice(), 
+                        product.getPrice() * entry.getStock(), 
+                        entry.getTimestamp()
+                    });
+                }
+            }
+        } else {
+            // LOAD CONTENTS
+            ArrayList<History> history = sqlite.getHistory();
+            for(int nCtr = 0; nCtr < history.size(); nCtr++){
+                Product product = sqlite.getProduct(history.get(nCtr).getName());
+                tableModel.addRow(new Object[]{
+                    history.get(nCtr).getUsername(), 
+                    history.get(nCtr).getName(), 
+                    history.get(nCtr).getStock(), 
+                    product.getPrice(), 
+                    product.getPrice() * history.get(nCtr).getStock(), 
+                    history.get(nCtr).getTimestamp()
+                });
+            }
         }
+        table.revalidate();
+        table.repaint();
+
     }
     
     public void designer(JTextField component, String text){

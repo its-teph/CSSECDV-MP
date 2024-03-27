@@ -22,17 +22,25 @@ public class MgmtProduct extends javax.swing.JPanel {
     public SQLite sqlite;
     public DefaultTableModel tableModel;
     
-    public MgmtProduct(SQLite sqlite) {
+    public MgmtProduct(SQLite sqlite, int role) {
         initComponents();
         this.sqlite = sqlite;
         tableModel = (DefaultTableModel)table.getModel();
         table.getTableHeader().setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 14));
-
-//        UNCOMMENT TO DISABLE BUTTONS
-//        purchaseBtn.setVisible(false);
-//        addBtn.setVisible(false);
-//        editBtn.setVisible(false);
-//        deleteBtn.setVisible(false);
+        
+        switch (role) {
+            case 4: // manager
+                purchaseBtn.setVisible(false);
+                break;
+            case 3: // staff
+                purchaseBtn.setVisible(false);
+                break;
+            case 2: // client
+                addBtn.setVisible(false);
+                editBtn.setVisible(false);
+                deleteBtn.setVisible(false);
+                break; 
+        }
     }
 
     public void init(){
@@ -209,7 +217,15 @@ public class MgmtProduct extends javax.swing.JPanel {
             System.out.println(nameFld.getText());
             System.out.println(stockFld.getText());
             System.out.println(priceFld.getText());
-        }
+           
+            try {
+                sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Integer.parseInt(priceFld.getText()));
+                JOptionPane.showMessageDialog(null, "Product '" + nameFld.getText() + "' has been successfully added.", "Addition Successful", JOptionPane.INFORMATION_MESSAGE);
+                init();
+            } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Failed to add product: " + ex.getMessage(), "Addition Failed", JOptionPane.ERROR_MESSAGE);
+                }
+        }  
     }//GEN-LAST:event_addBtnActionPerformed
 
     private void editBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editBtnActionPerformed
@@ -232,16 +248,24 @@ public class MgmtProduct extends javax.swing.JPanel {
                 System.out.println(nameFld.getText());
                 System.out.println(stockFld.getText());
                 System.out.println(priceFld.getText());
+                
+                sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Integer.parseInt(priceFld.getText()));
             }
         }
     }//GEN-LAST:event_editBtnActionPerformed
 
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
         if(table.getSelectedRow() >= 0){
+            String prodName = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
             int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE PRODUCT", JOptionPane.YES_NO_OPTION);
             
             if (result == JOptionPane.YES_OPTION) {
                 System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                
+                sqlite.removeProduct(prodName);
+                
+                JOptionPane.showMessageDialog(null, "Product '" + prodName + "' has been successfully deleted.", "Deletion Successful", JOptionPane.INFORMATION_MESSAGE);
+                init();
             }
         }
     }//GEN-LAST:event_deleteBtnActionPerformed

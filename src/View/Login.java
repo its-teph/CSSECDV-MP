@@ -152,6 +152,9 @@ public class Login extends javax.swing.JPanel {
                     sqlite.addLogs("LOGIN", username, username + " logged in successfully.", new Timestamp(new Date().getTime()).toString());
                     clearFields();
                     frame.currUserRole(u.getRole());
+                    if (u.getRole() == 2) {
+                        frame.currUserName(username);
+                    }
                     frame.mainNav(); // Login successful
                     //int role = u.getRole();
                 }
