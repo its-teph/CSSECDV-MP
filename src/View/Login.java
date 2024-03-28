@@ -120,14 +120,20 @@ public class Login extends javax.swing.JPanel {
 
                 int failedAttempts = countFailedAttempts(username,logs);
 
-                if (u.getLocked() == 1) { // user is locked
+                if (u.getRole() == 1){ // account is disabled
+                    JOptionPane.showMessageDialog(this, "Your account is disabled. Please contact admin if incorrect.", "Account Locked", JOptionPane.ERROR_MESSAGE);
+                    clearFields();
+                    sqlite.addLogs("ACCOUNT DISABLED", username, username + " account disabled, login attempt made.", new Timestamp(new Date().getTime()).toString());   
+                    return;
+                }
+                else if (u.getLocked() == 1) { // user is locked
                     JOptionPane.showMessageDialog(this, "Your account is locked. Please contact admin to regain access.", "Account Locked", JOptionPane.ERROR_MESSAGE);
                     clearFields();
                     sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());   
                     return;
                 } else if (failedAttempts >= 3){ // not locked but 3 failed attempts
                     JOptionPane.showMessageDialog(this, "Your account is locked. Please contact admin to regain access.", "Account Locked", JOptionPane.ERROR_MESSAGE);
-                     sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
+                    sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
                     u.setLocked(1); // set lock to 1 or true
                     clearFields();
                     return;
