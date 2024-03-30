@@ -8,7 +8,9 @@ package View;
 import Controller.SQLite;
 import Model.History;
 import Model.Product;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
@@ -25,11 +27,11 @@ public class MgmtHistory extends javax.swing.JPanel {
     private String username = null;
     private int role = 0;
     
-    public MgmtHistory(SQLite sqlite, String username, int role) {
+    public MgmtHistory(SQLite sqlite, int role) {
         initComponents();
         this.sqlite = sqlite;
-        this.username = username;
         this.role = role;
+    
         tableModel = (DefaultTableModel)table.getModel();
         table.getTableHeader().setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, 14));
         javax.swing.table.DefaultTableCellRenderer rightAlign = new javax.swing.table.DefaultTableCellRenderer();
@@ -42,22 +44,40 @@ public class MgmtHistory extends javax.swing.JPanel {
         if(role == 2) {
             searchBtn.setVisible(false);
         }
-        
-//        UNCOMMENT TO DISABLE BUTTONS
-//        searchBtn.setVisible(false);
-//        reportBtn.setVisible(false);
     }
 
-    public void init(){
+    public void init(String given_username){
+        this.username = given_username;
+        sqlite.addLogs("VIEW HISTORY", username, username + " viewed history.", new Timestamp(new Date().getTime()).toString());
 //      CLEAR TABLE
         for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
             tableModel.removeRow(0);
         }    
+
+        // LOAD CONTENTS
+        ArrayList<History> history = sqlite.getHistory();
+           for(int nCtr = 0; nCtr < history.size(); nCtr++){
+                Product product = sqlite.getProduct(history.get(nCtr).getName());
+                tableModel.addRow(new Object[]{
+                    history.get(nCtr).getUsername(), 
+                    history.get(nCtr).getName(), 
+                    history.get(nCtr).getStock(), 
+                    product.getPrice(), 
+                    product.getPrice() * history.get(nCtr).getStock(), 
+                    history.get(nCtr).getTimestamp()
+            });
+        }
+    }
+    
+    public void filtered(String given_username) {
+        this.username = given_username;
+        sqlite.addLogs("VIEW HISTORY", username, username + " viewed their purchase history.", new Timestamp(new Date().getTime()).toString());
+        for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
+            tableModel.removeRow(0);
+        }
         
-        // NOT WORKING PLS FIX WALA LUMALABAS
-        if (role == 2) {
-            for (History entry : sqlite.getHistory()) {
-                if (entry.getUsername().equals(username)) {
+        for (History entry : sqlite.getHistory()) {
+                if (entry.getUsername().equals(given_username)) {
                     Product product = sqlite.getProduct(entry.getName());
                     tableModel.addRow(new Object[]{
                         entry.getUsername(), 
@@ -69,24 +89,6 @@ public class MgmtHistory extends javax.swing.JPanel {
                     });
                 }
             }
-        } else {
-            // LOAD CONTENTS
-            ArrayList<History> history = sqlite.getHistory();
-            for(int nCtr = 0; nCtr < history.size(); nCtr++){
-                Product product = sqlite.getProduct(history.get(nCtr).getName());
-                tableModel.addRow(new Object[]{
-                    history.get(nCtr).getUsername(), 
-                    history.get(nCtr).getName(), 
-                    history.get(nCtr).getStock(), 
-                    product.getPrice(), 
-                    product.getPrice() * history.get(nCtr).getStock(), 
-                    history.get(nCtr).getTimestamp()
-                });
-            }
-        }
-        table.revalidate();
-        table.repaint();
-
     }
     
     public void designer(JTextField component, String text){
@@ -226,7 +228,11 @@ public class MgmtHistory extends javax.swing.JPanel {
     }//GEN-LAST:event_searchBtnActionPerformed
 
     private void reloadBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reloadBtnActionPerformed
-        init();
+        if (role == 2) {
+            filtered(username);
+        } else {
+            init(username);
+        }
     }//GEN-LAST:event_reloadBtnActionPerformed
 
 

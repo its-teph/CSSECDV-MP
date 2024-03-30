@@ -21,9 +21,9 @@ import javax.swing.table.DefaultTableModel;
  */
 public class AdminHome extends javax.swing.JPanel {
 
-    public MgmtHistory mgmtHistory;
+    //public MgmtHistory mgmtHistory;
     public MgmtLogs mgmtLogs;
-    public MgmtProduct mgmtProduct;
+    //public MgmtProduct mgmtProduct;
     public MgmtUser mgmtUser;
     
     private CardLayout contentView = new CardLayout();
@@ -34,16 +34,16 @@ public class AdminHome extends javax.swing.JPanel {
     }
     
     public void init(SQLite sqlite){
-        mgmtHistory = new MgmtHistory(sqlite, "none", 5);
+        //mgmtHistory = new MgmtHistory(sqlite, "none", 5);
         mgmtLogs = new MgmtLogs(sqlite);
-        mgmtProduct = new MgmtProduct(sqlite, role);
+        //mgmtProduct = new MgmtProduct(sqlite, role);
         mgmtUser = new MgmtUser(sqlite);
         
         Content.setLayout(contentView);
         Content.add(new Home("WELCOME ADMIN!", new java.awt.Color(51, 153, 255)), "home");
         Content.add(this.mgmtUser, "mgmtUser");
-        Content.add(this.mgmtHistory, "mgmtHistory");
-        Content.add(this.mgmtProduct, "mgmtProduct");
+        //Content.add(this.mgmtHistory, "mgmtHistory");
+        //Content.add(this.mgmtProduct, "mgmtProduct");
         Content.add(this.mgmtLogs, "mgmtLogs");
         
 //        UNCOMMENT TO DISABLE BUTTONS
@@ -166,7 +166,7 @@ public class AdminHome extends javax.swing.JPanel {
     }//GEN-LAST:event_usersBtnActionPerformed
 
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
-        mgmtProduct.init();
+        //mgmtProduct.init();
         usersBtn.setForeground(Color.black);
         productsBtn.setForeground(Color.red);
         historyBtn.setForeground(Color.black);
@@ -175,7 +175,7 @@ public class AdminHome extends javax.swing.JPanel {
     }//GEN-LAST:event_productsBtnActionPerformed
 
     private void historyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_historyBtnActionPerformed
-        mgmtHistory.init();
+        //mgmtHistory.init();
         usersBtn.setForeground(Color.black);
         productsBtn.setForeground(Color.black);
         historyBtn.setForeground(Color.red);

@@ -61,7 +61,8 @@ public class Main {
        sqlite.addUser("staff", "qwerty1234", 3);
        sqlite.addUser("client1", "qwerty1234", 2);
        sqlite.addUser("client2", "qwerty1234", 2);
-       
+       sqlite.addUser("client3", "qwerty1234", 1); // disabled
+       //note: none of sample users start off as locked
        
        // Get users
        ArrayList<History> histories = sqlite.getHistory();

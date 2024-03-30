@@ -210,6 +210,7 @@ public class Frame extends javax.swing.JFrame {
     private void clientBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clientBtnActionPerformed
         if (userRole == 2){
             clientHomePnl.showPnl("home");
+            clientHomePnl.getUsername(username);
             contentView.show(Content, "clientHomePnl");
         } else {
             JOptionPane.showMessageDialog(this, "You do not have access to this page.", "Access Denied", JOptionPane.ERROR_MESSAGE);
@@ -268,8 +269,13 @@ public class Frame extends javax.swing.JFrame {
     public void mainNav(){
         frameView.show(Container, "homePnl");
         switch (userRole) {
+            case 5:
+                adminHomePnl.showPnl("home");
+                contentView.show(Content, "adminHomePnl");
+                break;
             case 4:
                 managerHomePnl.showPnl("home");
+                managerHomePnl.getUsername(username);
                 contentView.show(Content, "managerHomePnl");
                 break;
             case 3:

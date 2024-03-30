@@ -193,6 +193,7 @@ public class MgmtProduct extends javax.swing.JPanel {
             int result = JOptionPane.showConfirmDialog(null, message, "PURCHASE PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
             if (result == JOptionPane.OK_OPTION) {
+                // add log of username, what they purchased, how many + time stamp
                 System.out.println(stockFld.getText());
             }
         }
@@ -219,11 +220,12 @@ public class MgmtProduct extends javax.swing.JPanel {
             System.out.println(priceFld.getText());
            
             try {
+                // add log of username and what product they added + time stamp
                 sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Integer.parseInt(priceFld.getText()));
-                JOptionPane.showMessageDialog(null, "Product '" + nameFld.getText() + "' has been successfully added.", "Addition Successful", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Product '" + nameFld.getText() + "' has been successfully added.", "Add Product Successful", JOptionPane.INFORMATION_MESSAGE);
                 init();
             } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Failed to add product: " + ex.getMessage(), "Addition Failed", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Failed to add product: " + ex.getMessage(), "Add Product Failed", JOptionPane.ERROR_MESSAGE);
                 }
         }  
     }//GEN-LAST:event_addBtnActionPerformed
@@ -248,7 +250,7 @@ public class MgmtProduct extends javax.swing.JPanel {
                 System.out.println(nameFld.getText());
                 System.out.println(stockFld.getText());
                 System.out.println(priceFld.getText());
-                
+                // add log of username, what they edited + time stamp
                 sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Integer.parseInt(priceFld.getText()));
             }
         }
@@ -263,9 +265,9 @@ public class MgmtProduct extends javax.swing.JPanel {
                 System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
                 
                 sqlite.removeProduct(prodName);
-                
+                // add log of username and what product they deleted + time stamp
                 JOptionPane.showMessageDialog(null, "Product '" + prodName + "' has been successfully deleted.", "Deletion Successful", JOptionPane.INFORMATION_MESSAGE);
-                init();
+                init(); // will refresh products list
             }
         }
     }//GEN-LAST:event_deleteBtnActionPerformed
