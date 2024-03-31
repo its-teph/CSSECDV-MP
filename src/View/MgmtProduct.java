@@ -7,7 +7,9 @@ package View;
 
 import Controller.SQLite;
 import Model.Product;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -21,6 +23,8 @@ public class MgmtProduct extends javax.swing.JPanel {
 
     public SQLite sqlite;
     public DefaultTableModel tableModel;
+    
+    private String username = null;
     
     public MgmtProduct(SQLite sqlite, int role) {
         initComponents();
@@ -43,7 +47,8 @@ public class MgmtProduct extends javax.swing.JPanel {
         }
     }
 
-    public void init(){
+    public void init(String username){
+        this.username = username;
         //      CLEAR TABLE
         for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
             tableModel.removeRow(0);
@@ -203,7 +208,7 @@ public class MgmtProduct extends javax.swing.JPanel {
                 int newStock = availableStock - purchasedQuantity;
                 String productName = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
                 }
-
+              
                 System.out.println(stockFld.getText());
             }
         }
@@ -225,10 +230,10 @@ public class MgmtProduct extends javax.swing.JPanel {
         int result = JOptionPane.showConfirmDialog(null, message, "ADD PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
         if (result == JOptionPane.OK_OPTION) {
-            System.out.println(nameFld.getText());
-            System.out.println(stockFld.getText());
-            System.out.println(priceFld.getText());
-           
+            String productName = nameFld.getText();
+            String stockStr = stockFld.getText();
+            String priceStr = priceFld.getText();
+
             try {
                 // add log of username and what product they added + time stamp
                 sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()));
@@ -236,7 +241,41 @@ public class MgmtProduct extends javax.swing.JPanel {
                 init();
             } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Failed to add product: " + ex.getMessage(), "Add Product Failed", JOptionPane.ERROR_MESSAGE);
+
+                // Check if any field is empty
+                if (productName.isEmpty() || stockStr.isEmpty() || priceStr.isEmpty()) {
+                    throw new IllegalArgumentException("Please fill in all fields.");
                 }
+
+                // Check if the product already exists
+                if (sqlite.productExists(productName)) {
+                    throw new IllegalArgumentException("Product '" + productName + "' already exists.");
+                }
+
+                // Parse stock and price
+                int stock = Integer.parseInt(stockStr);
+                float price = Float.parseFloat(priceStr);
+
+                // Check if stock is negative
+                if (stock < 1) {
+                    throw new IllegalArgumentException("Stock must be positive.");
+                }
+
+                // Check if price is non-positive
+                if (price <= 0) {
+                    throw new IllegalArgumentException("Price must be positive.");
+                }
+
+                // Add the product
+                sqlite.addProduct(productName, stock, price);
+                sqlite.addLogs("ADD PRODUCT", username, username + " added product '" + productName + "'. Stock: " + stock + ", Price: " + price, new Timestamp(new Date().getTime()).toString());
+                JOptionPane.showMessageDialog(null, "Product '" + productName + "' has been successfully added.", "Add Product Successful", JOptionPane.INFORMATION_MESSAGE);
+                init(this.username);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Invalid format for stock or price.", "Add Product Failed", JOptionPane.ERROR_MESSAGE);
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage(), "Add Product Failed", JOptionPane.ERROR_MESSAGE);
+            }
         }  
     }//GEN-LAST:event_addBtnActionPerformed
 
@@ -245,7 +284,11 @@ public class MgmtProduct extends javax.swing.JPanel {
             JTextField nameFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 0) + "");
             JTextField stockFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 1) + "");
             JTextField priceFld = new JTextField(tableModel.getValueAt(table.getSelectedRow(), 2) + "");
-
+            
+            String productName = tableModel.getValueAt(table.getSelectedRow(), 0).toString();
+            String currentStock = tableModel.getValueAt(table.getSelectedRow(), 1).toString();
+            String currentPrice = tableModel.getValueAt(table.getSelectedRow(), 2).toString();
+                    
             designer(nameFld, "PRODUCT NAME");
             designer(stockFld, "PRODUCT STOCK");
             designer(priceFld, "PRODUCT PRICE");
@@ -257,16 +300,67 @@ public class MgmtProduct extends javax.swing.JPanel {
             int result = JOptionPane.showConfirmDialog(null, message, "EDIT PRODUCT", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
 
             if (result == JOptionPane.OK_OPTION) {
+                // Check if any field is empty
+                if (nameFld.getText().isEmpty() || stockFld.getText().isEmpty() || priceFld.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please fill in all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Check if price is less than 1
+                try {
+                    float price = Float.parseFloat(priceFld.getText());
+                    if (price < 1) {
+                        JOptionPane.showMessageDialog(null, "Price cannot be lower than 1.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid price format.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Check if stock is less than 0
+                try {
+                    int stock = Integer.parseInt(stockFld.getText());
+                    if (stock < 0) {
+                        JOptionPane.showMessageDialog(null, "Stock cannot be lower than 0.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    } else if (stock == 0) {
+                        int confirmDelete = JOptionPane.showConfirmDialog(null, "Stock is 0. Do you want to delete the product?", "Delete Product", JOptionPane.YES_NO_OPTION);
+                        if (confirmDelete == JOptionPane.YES_OPTION) {
+                            sqlite.removeProduct(productName);
+                            init(this.username); //refresh prod list
+                            return;
+                        }
+                    }        
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid stock format.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                // Product name already exsists
+                if (!productName.equals(nameFld.getText()) && sqlite.productExists(nameFld.getText())) {
+                JOptionPane.showMessageDialog(null, "Product name already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+                }
+
+                // If all validations pass, proceed with the edit operation
                 System.out.println(nameFld.getText());
                 System.out.println(stockFld.getText());
                 System.out.println(priceFld.getText());
-               // add log of username, what they edited + time stamp
-               // Delete the original product
-                sqlite.removeProduct(nameFld.getText());
-
-                // Add the edited product
+               
+                // add log of username, what they edited + time stamp
+                sqlite.removeProduct(productName); //drop old product and add new
                 sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()));
-                init(); // will refresh products list
+                
+                String logMessage = username + " edited the " + productName + " product:\n";
+                logMessage += "Previous Name: " + productName + ", New Name: " + nameFld.getText() + "\n";
+                logMessage += "Previous Stock: " + currentStock + ", New Stock: " + stockFld.getText() + "\n";
+                logMessage += "Previous Price: " + currentPrice + ", New Price: " + priceFld.getText();
+                sqlite.removeProduct(productName); //drop old product and add new
+                sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()));
+                sqlite.addLogs("EDIT PRODUCT", username, logMessage, new Timestamp(new Date().getTime()).toString());
+                init(this.username); //refresh prod list
+
             }
         }
     }//GEN-LAST:event_editBtnActionPerformed
@@ -280,13 +374,14 @@ public class MgmtProduct extends javax.swing.JPanel {
                 System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
                 
                 sqlite.removeProduct(prodName);
+                sqlite.addLogs("DELETE PRODUCT", username, username + " deleted the " + prodName + " product.", new Timestamp(new Date().getTime()).toString());
+
                 // add log of username and what product they deleted + time stamp
-                JOptionPane.showMessageDialog(null, "Product '" + prodName + "' has been successfully deleted.", "Deletion Successful", JOptionPane.INFORMATION_MESSAGE);
-                init(); // will refresh products list
+                JOptionPane.showMessageDialog(null, "Product '" + prodName + "' has been successfully deleted.", "Deletion Successful", JOptionPane.INFORMATION_MESSAGE);         
+                init(this.username); // will refresh products list
             }
         }
     }//GEN-LAST:event_deleteBtnActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addBtn;

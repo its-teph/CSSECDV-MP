@@ -29,6 +29,7 @@ public class StaffHome extends javax.swing.JPanel {
     
     private CardLayout contentView = new CardLayout();
     private int role = 3;
+    private String username;
     
     public StaffHome() {
         initComponents();
@@ -56,6 +57,10 @@ public class StaffHome extends javax.swing.JPanel {
     
     public void showPnl(String panelName){
         contentView.show(Content, panelName);
+    }
+    
+    public void getUsername(String username){
+        this.username = username;
     }
 
     /**
@@ -167,7 +172,7 @@ public class StaffHome extends javax.swing.JPanel {
     }//GEN-LAST:event_usersBtnActionPerformed
 
     private void productsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_productsBtnActionPerformed
-        mgmtProduct.init();
+        mgmtProduct.init(username);
         usersBtn.setForeground(Color.black);
         productsBtn.setForeground(Color.red);
         historyBtn.setForeground(Color.black);

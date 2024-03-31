@@ -330,4 +330,17 @@ public class SQLite {
         }
         return product;
     }
+    
+    public boolean productExists(String name) {
+        String sql = "SELECT COUNT(*) AS count FROM product WHERE LOWER(name) = LOWER('" + name + "')";
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            int count = rs.getInt("count");
+            return count > 0;
+        } catch (Exception ex) {
+            System.out.print(ex);
+            return false;
+        }
+    }
 }
