@@ -194,6 +194,16 @@ public class MgmtProduct extends javax.swing.JPanel {
 
             if (result == JOptionPane.OK_OPTION) {
                 // add log of username, what they purchased, how many + time stamp
+                int purchasedQuantity = Integer.parseInt(stockFld.getText());
+                int availableStock = (int) tableModel.getValueAt(table.getSelectedRow(), 1);
+                 
+                if (purchasedQuantity > availableStock) {
+                    JOptionPane.showMessageDialog(null, "Not enough stock available.", "Purchase Failed", JOptionPane.ERROR_MESSAGE);
+                } else {
+                int newStock = availableStock - purchasedQuantity;
+                String productName = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
+                }
+
                 System.out.println(stockFld.getText());
             }
         }
@@ -221,7 +231,7 @@ public class MgmtProduct extends javax.swing.JPanel {
            
             try {
                 // add log of username and what product they added + time stamp
-                sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Integer.parseInt(priceFld.getText()));
+                sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()));
                 JOptionPane.showMessageDialog(null, "Product '" + nameFld.getText() + "' has been successfully added.", "Add Product Successful", JOptionPane.INFORMATION_MESSAGE);
                 init();
             } catch (Exception ex) {
@@ -250,8 +260,13 @@ public class MgmtProduct extends javax.swing.JPanel {
                 System.out.println(nameFld.getText());
                 System.out.println(stockFld.getText());
                 System.out.println(priceFld.getText());
-                // add log of username, what they edited + time stamp
-                sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Integer.parseInt(priceFld.getText()));
+               // add log of username, what they edited + time stamp
+               // Delete the original product
+                sqlite.removeProduct(nameFld.getText());
+
+                // Add the edited product
+                sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()));
+                init(); // will refresh products list
             }
         }
     }//GEN-LAST:event_editBtnActionPerformed
