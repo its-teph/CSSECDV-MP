@@ -22,9 +22,9 @@ import javax.swing.table.DefaultTableModel;
 public class ClientHome extends javax.swing.JPanel {
 
     public MgmtHistory mgmtHistory;
-    //public MgmtLogs mgmtLogs;
+    public MgmtLogs mgmtLogs;
     public MgmtProduct mgmtProduct;
-    //public MgmtUser mgmtUser;
+    public MgmtUser mgmtUser;
     
     private CardLayout contentView = new CardLayout();
     private int role = 2;
@@ -36,16 +36,16 @@ public class ClientHome extends javax.swing.JPanel {
     
     public void init(SQLite sqlite){
         mgmtHistory = new MgmtHistory(sqlite, role);
-        //mgmtLogs = new MgmtLogs(sqlite);
+        mgmtLogs = new MgmtLogs(sqlite);
         mgmtProduct = new MgmtProduct(sqlite, role);
-        //mgmtUser = new MgmtUser(sqlite);
+        mgmtUser = new MgmtUser(sqlite);
     
         Content.setLayout(contentView);
         Content.add(new Home("WELCOME CLIENT!", new java.awt.Color(255,102,51)), "home");
-        //Content.add(mgmtUser, "mgmtUser");
+        Content.add(mgmtUser, "mgmtUser");
         Content.add(mgmtHistory, "mgmtHistory");
         Content.add(mgmtProduct, "mgmtProduct");
-        //Content.add(mgmtLogs, "mgmtLogs");
+        Content.add(mgmtLogs, "mgmtLogs");
         
 //      UNCOMMENT TO DISABLE BUTTONS
 //      historyBtn.setVisible(false);
