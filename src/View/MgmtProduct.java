@@ -205,11 +205,19 @@ public class MgmtProduct extends javax.swing.JPanel {
                 if (purchasedQuantity > availableStock) {
                     JOptionPane.showMessageDialog(null, "Not enough stock available.", "Purchase Failed", JOptionPane.ERROR_MESSAGE);
                 } else {
-                int newStock = availableStock - purchasedQuantity;
-                String productName = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
+                    int newStock = availableStock - purchasedQuantity;
+                    tableModel.setValueAt(newStock, table.getSelectedRow(), 1);
+                    String productName = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
+                    
+                    String logMessage = username + " purchased " + purchasedQuantity + " of " + productName;
+                    sqlite.addLogs("PURCHASE", username, logMessage, new Timestamp(new Date().getTime()).toString());
+                    
                 }
+                
+                JOptionPane.showMessageDialog(null, "Purchase successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
               
                 System.out.println(stockFld.getText());
+                
             }
         }
     }//GEN-LAST:event_purchaseBtnActionPerformed
@@ -238,7 +246,7 @@ public class MgmtProduct extends javax.swing.JPanel {
                 // add log of username and what product they added + time stamp
                 sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()));
                 JOptionPane.showMessageDialog(null, "Product '" + nameFld.getText() + "' has been successfully added.", "Add Product Successful", JOptionPane.INFORMATION_MESSAGE);
-                init();
+               
             } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Failed to add product: " + ex.getMessage(), "Add Product Failed", JOptionPane.ERROR_MESSAGE);
 
@@ -271,10 +279,6 @@ public class MgmtProduct extends javax.swing.JPanel {
                 sqlite.addLogs("ADD PRODUCT", username, username + " added product '" + productName + "'. Stock: " + stock + ", Price: " + price, new Timestamp(new Date().getTime()).toString());
                 JOptionPane.showMessageDialog(null, "Product '" + productName + "' has been successfully added.", "Add Product Successful", JOptionPane.INFORMATION_MESSAGE);
                 init(this.username);
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(null, "Invalid format for stock or price.", "Add Product Failed", JOptionPane.ERROR_MESSAGE);
-            } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(null, ex.getMessage(), "Add Product Failed", JOptionPane.ERROR_MESSAGE);
             }
         }  
     }//GEN-LAST:event_addBtnActionPerformed
@@ -349,8 +353,8 @@ public class MgmtProduct extends javax.swing.JPanel {
                 System.out.println(priceFld.getText());
                
                 // add log of username, what they edited + time stamp
-                sqlite.removeProduct(productName); //drop old product and add new
-                sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()));
+               // sqlite.removeProduct(productName); //drop old product and add new
+               // sqlite.addProduct(nameFld.getText(), Integer.parseInt(stockFld.getText()), Float.parseFloat(priceFld.getText()));
                 
                 String logMessage = username + " edited the " + productName + " product:\n";
                 logMessage += "Previous Name: " + productName + ", New Name: " + nameFld.getText() + "\n";
