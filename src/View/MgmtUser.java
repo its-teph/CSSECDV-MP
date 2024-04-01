@@ -232,6 +232,11 @@ public class MgmtUser extends javax.swing.JPanel {
                 sqlite.changeLock(username, lock);
                 sqlite.addLogs("LOCK/UNLOCK USER", "admin", username + " was " + state, new Timestamp(new Date().getTime()).toString());
                 JOptionPane.showMessageDialog(null, "User '" + username + " was " + state, "Lock/Unlock Successful", JOptionPane.INFORMATION_MESSAGE);
+                
+                // If the action was to unlock the user, also log a successful login to let them login again
+                if (!lock) {
+                    sqlite.addLogs("LOGIN", username, username + " password was changed, login for unlocking.", new Timestamp(new Date().getTime()).toString());
+                }
                 init();
             }
         }

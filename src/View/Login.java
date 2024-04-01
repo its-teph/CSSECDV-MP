@@ -134,7 +134,8 @@ public class Login extends javax.swing.JPanel {
                 } else if (failedAttempts >= 3){ // not locked but 3 failed attempts
                     JOptionPane.showMessageDialog(this, "Your account is locked. Please contact admin to regain access.", "Account Locked", JOptionPane.ERROR_MESSAGE);
                     sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
-                    u.setLocked(1); // set lock to 1 or true
+                    //u.setLocked(1); // set lock to 1 or true
+                    sqlite.changeLock(username, true);
                     clearFields();
                     return;
                 }
@@ -148,7 +149,8 @@ public class Login extends javax.swing.JPanel {
                     if (failedAttempts >= 3){ // not locked but 3 failed attempts
                     JOptionPane.showMessageDialog(this, "Your account is locked. Please contact admin to regain access.", "Account Locked", JOptionPane.ERROR_MESSAGE);
                     sqlite.addLogs("ACCOUNT LOCKED", username, username + " account locked due to 3 or more wrong password attempts.", new Timestamp(new Date().getTime()).toString());
-                    u.setLocked(1); // set lock to 1 or true
+                    //u.setLocked(1); // set lock to 1 or true
+                    sqlite.changeLock(username, true);
                     return;
                     } else { // wrong pw not yet locked
                         JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
