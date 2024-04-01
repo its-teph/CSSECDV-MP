@@ -343,4 +343,54 @@ public class SQLite {
             return false;
         }
     }
+    
+    public void updateProductStock(String productName, int newStock) {
+        String sql = "UPDATE product SET stock = '" + newStock + "' WHERE name = '" + productName + "'";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+            Statement stmt = conn.createStatement()){
+            stmt.executeUpdate(sql);
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+    
+    public void editRole(String username, int newRole) {
+        String sql = "UPDATE users SET role = '" + newRole + "' WHERE username = '" + username + "'";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(sql);
+            System.out.println("Role of user " + username + " has been updated to " + newRole);
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+    
+    public void changeLock(String username, boolean newLockStatus) {
+        int newLockValue = newLockStatus ? 1 : 0;
+            String sql = "UPDATE users SET locked = '" + newLockValue + "' WHERE username = '" + username + "'";
+
+            try (Connection conn = DriverManager.getConnection(driverURL);
+                 Statement stmt = conn.createStatement()) {
+                stmt.executeUpdate(sql);
+                String lockStatus = newLockStatus ? "locked" : "unlocked";
+                System.out.println("Lock status of user " + username + " has been changed to " + lockStatus);
+            } catch (Exception ex) {
+                System.out.print(ex);
+        }
+    }
+    
+    public void changePassword(String username, String newPassword) {
+        String sql = "UPDATE users SET password = '" + newPassword + "' WHERE username = '" + username + "'";
+
+        try (Connection conn = DriverManager.getConnection(driverURL);
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(sql);
+            System.out.println("Password for user " + username + " has been updated.");
+        } catch (Exception ex) {
+            System.out.print(ex);
+        }
+    }
+    
 }

@@ -7,7 +7,9 @@ package View;
 
 import Controller.SQLite;
 import Model.User;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
@@ -189,8 +191,15 @@ public class MgmtUser extends javax.swing.JPanel {
                 "EDIT USER ROLE", JOptionPane.QUESTION_MESSAGE, null, options, options[(int)tableModel.getValueAt(table.getSelectedRow(), 2) - 1]);
             
             if(result != null){
-                System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
-                System.out.println(result.charAt(0));
+                String username = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
+                int newRole = Character.getNumericValue(result.charAt(0));
+                //System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                //System.out.println(result.charAt(0));
+                sqlite.addLogs("EDIT ROLE", "admin", username + " role was changed.", new Timestamp(new Date().getTime()).toString());
+                sqlite.editRole(username, newRole);
+                JOptionPane.showMessageDialog(null, "User '" + username + "' role was changed to " + newRole, "Edit role Successful", JOptionPane.INFORMATION_MESSAGE);
+
+                init();
             }
         }
     }//GEN-LAST:event_editRoleBtnActionPerformed
@@ -198,44 +207,76 @@ public class MgmtUser extends javax.swing.JPanel {
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
         if(table.getSelectedRow() >= 0){
             int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE USER", JOptionPane.YES_NO_OPTION);
-            
+            String username = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
             if (result == JOptionPane.YES_OPTION) {
                 System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                sqlite.removeUser(username);
+                sqlite.addLogs("DELETED USER", "admin", username + " was deleted.", new Timestamp(new Date().getTime()).toString());
+                JOptionPane.showMessageDialog(null, "User '" + username + "' successfully deleted.", "Deletion Successful", JOptionPane.INFORMATION_MESSAGE);
+                init();
             }
         }
     }//GEN-LAST:event_deleteBtnActionPerformed
 
     private void lockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lockBtnActionPerformed
-        if(table.getSelectedRow() >= 0){
-            String state = "lock";
-            if("1".equals(tableModel.getValueAt(table.getSelectedRow(), 3) + "")){
-                state = "unlock";
-            }
-            
-            int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to " + state + " " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "DELETE USER", JOptionPane.YES_NO_OPTION);
-            
+        if (table.getSelectedRow() >= 0) {
+            boolean isLocked = "1".equals(tableModel.getValueAt(table.getSelectedRow(), 3) + "");
+            String state = isLocked ? "unlock" : "lock";
+
+            int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to " + state + " " + tableModel.getValueAt(table.getSelectedRow(), 0) + "?", "LOCK/UNLOCK USER", JOptionPane.YES_NO_OPTION);
+
             if (result == JOptionPane.YES_OPTION) {
-                System.out.println(tableModel.getValueAt(table.getSelectedRow(), 0));
+                boolean lock = !isLocked; // Inverse the current lock status
+                String username = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
+
+                sqlite.changeLock(username, lock);
+                sqlite.addLogs("LOCK/UNLOCK USER", "admin", username + " was " + state, new Timestamp(new Date().getTime()).toString());
+                JOptionPane.showMessageDialog(null, "User '" + username + " was " + state, "Lock/Unlock Successful", JOptionPane.INFORMATION_MESSAGE);
+                init();
             }
         }
     }//GEN-LAST:event_lockBtnActionPerformed
 
     private void chgpassBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chgpassBtnActionPerformed
-        if(table.getSelectedRow() >= 0){
-            JTextField password = new JPasswordField();
-            JTextField confpass = new JPasswordField();
-            designer(password, "PASSWORD");
-            designer(confpass, "CONFIRM PASSWORD");
-            
+        if (table.getSelectedRow() >= 0) {
+            JPasswordField password = new JPasswordField();
+            JPasswordField confpass = new JPasswordField();
+
             Object[] message = {
                 "Enter New Password:", password, confpass
             };
 
             int result = JOptionPane.showConfirmDialog(null, message, "CHANGE PASSWORD", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null);
-            
+
             if (result == JOptionPane.OK_OPTION) {
-                System.out.println(password.getText());
-                System.out.println(confpass.getText());
+                String newPassword = new String(password.getPassword());
+                String confPassword = new String(confpass.getPassword());
+
+                if (newPassword.length() < 8) {
+                    // Password does not meet the criteria
+                    JOptionPane.showMessageDialog(null, "Password must be at least 8 characters", "Password Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (!newPassword.chars().anyMatch(Character::isUpperCase)) {
+                    // Password does not meet the criteria
+                    JOptionPane.showMessageDialog(null, "Password must contain at least one uppercase letter.", "Password Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (!newPassword.equals(confPassword)) {
+                    // Passwords do not match
+                    JOptionPane.showMessageDialog(null, "Passwords do not match.", "Password Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Proceed with password change
+                String username = (String) tableModel.getValueAt(table.getSelectedRow(), 0);
+                
+                sqlite.changePassword(username, newPassword);
+                sqlite.addLogs("CHANGE PASSWORD", "admin", username + " password was changed.", new Timestamp(new Date().getTime()).toString());
+                JOptionPane.showMessageDialog(null, "Password for user '" + username + "' successfully changed.", "Password Change Successful", JOptionPane.INFORMATION_MESSAGE);
+                init();
             }
         }
     }//GEN-LAST:event_chgpassBtnActionPerformed

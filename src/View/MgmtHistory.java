@@ -49,22 +49,19 @@ public class MgmtHistory extends javax.swing.JPanel {
     public void init(String given_username){
         this.username = given_username;
         sqlite.addLogs("VIEW HISTORY", username, username + " viewed history.", new Timestamp(new Date().getTime()).toString());
-//      CLEAR TABLE
+        // CLEAR TABLE
         for(int nCtr = tableModel.getRowCount(); nCtr > 0; nCtr--){
             tableModel.removeRow(0);
         }    
 
         // LOAD CONTENTS
         ArrayList<History> history = sqlite.getHistory();
-           for(int nCtr = 0; nCtr < history.size(); nCtr++){
-                Product product = sqlite.getProduct(history.get(nCtr).getName());
-                tableModel.addRow(new Object[]{
-                    history.get(nCtr).getUsername(), 
-                    history.get(nCtr).getName(), 
-                    history.get(nCtr).getStock(), 
-                    product.getPrice(), 
-                    product.getPrice() * history.get(nCtr).getStock(), 
-                    history.get(nCtr).getTimestamp()
+        for(int nCtr = 0; nCtr < history.size(); nCtr++){
+            tableModel.addRow(new Object[]{
+                history.get(nCtr).getUsername(), 
+                history.get(nCtr).getName(), // Show also deleted products
+                history.get(nCtr).getStock(), 
+                history.get(nCtr).getTimestamp()
             });
         }
     }

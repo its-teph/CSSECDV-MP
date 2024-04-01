@@ -162,6 +162,9 @@ public class Login extends javax.swing.JPanel {
                     frame.mainNav(); // Login successful
                     //int role = u.getRole();
                 }
+            } else {
+                JOptionPane.showMessageDialog(this, "Username or password incorrect. Please try again.", "Login Error", JOptionPane.ERROR_MESSAGE);
+                clearFields();
             }
         }
     }//GEN-LAST:event_loginBtnActionPerformed
